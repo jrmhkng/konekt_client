@@ -153,6 +153,7 @@ def connect_main():
         board.append(new_layer)
         
     turn = 0
+    do = True
     
     #where to establish connection
     
@@ -160,48 +161,85 @@ def connect_main():
     port = 12345
     mySocket = socket.socket()
     mySocket.connect((host,port))
-    print ("Say hello")
-    message = input()
-    mySocket.send(message.encode())
-    message = mySocket.recv(1024).decode()
-    print (message)
     
-    while True:  #loop to accept messges/errors
-        #send message
-        os.system("clear")
-        print_board()
+    data = mySocket.recv(1024).decode()
+    print (data)
+    
+    message = input("> ")
+    mySocket.send(message.encode())
+    
+    data = mySocket.recv(1024).decode()
+    print (data)
+    
+    if data != "GO AHEAD":
+        print ("Imposter, this isn't the right server!")
+        print ("Terminating connection")
+        do = False
         
-        print ("Where would you like to move?")
-        message = input ("> ")
-        mySocket.send(message.encode())
-        
-        data = mySocket.recv(1024).decode()
-        print (data)
-        
-        if data == "OK":
-            do_move(int(message[-1]), turn)
-            turn += 1
-            #print_board()
-            new_move = mySocket.recv(1024).decode()
-            print ("Server move", new_move)
-            do_move(int(new_move), turn)
-            #print_board()
-            turn += 1
-        elif data == "ERROR 1":
-            print ("That column was full, choose a new one")
-            print ()
-            continue
-        elif data == "ERROR 2":
-            print ("That wasn't a valid column, pick a valid one")
-            print ()
-            continue
-        elif data == "ERROR 3":
-            print ("That was an invalid command, try again")
-            print ()
-            continue
-        elif data == "GOODBYE":
-            print ("Connection Terminated")
-            break
+    if do:
+        print ("Starting game")
+        while True:  #loop to accept messges/errors
+            #send message
+            os.system("clear")
+            print_board()
+                
+            print ("Where would you like to move?")
+            message = input ("> ")
+            try:
+                mySocket.send(message.encode())
+            except:
+                print ("Lost connection to the server")
+                print ("Closing application")
+                break
+            
+            data = mySocket.recv(1024).decode()
+            print (data)
+                
+            if data == "OK":
+                
+                do_move(int(message[-1]), turn)
+                turn += 1
+                #print_board()
+                new_move = mySocket.recv(1024).decode()
+                if new_move == "LOSS":
+                    print ("You won the game!")
+                    print ("Terminating connection")
+                    break
+                elif new_move == "WIN":
+                    print ("You lost the game :(")
+                    print ("Terminating connection")
+                    break
+                elif new_move == "GOODBYE":
+                    print ("Connection Terminated")
+                    break
+                
+                print ("Server move", new_move)
+                do_move(int(new_move), turn)
+                #print_board()
+                turn += 1
+            elif data == "ERROR 1":
+                print ("That column was full, choose a new one")
+                print ()
+                continue
+            elif data == "ERROR 2":
+                print ("That wasn't a valid column, pick a valid one")
+                print ()
+                continue
+            elif data == "ERROR 3":
+                print ("That was an invalid command, try again")
+                print ()
+                continue
+            elif data == "LOSS":
+                print ("You won the game!")
+                print ("Terminating connection")
+                break
+            elif data == "WIN":
+                print ("You lost the game :(")
+                print ("Terminating connection")
+                break
+            elif data == "GOODBYE":
+                print ("Connection Terminated")
+                break
     
     mySocket.close()
     
@@ -210,17 +248,3 @@ def connect_main():
 connect_main()
 
 
-
-
-
-
-
-
-
-#message = input(" ? ")
-#while message != 'q':
-   #mySocket.send(message.encode())
-   #data = mySocket.recv(1024).decode()
-   #print ('Received from server: ' + data)
-   #message = input(" ? ")
-#mySocket.close()
