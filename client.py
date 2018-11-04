@@ -178,9 +178,10 @@ def connect_main():
         
     if do:
         print ("Starting game")
+        os.system("clear")
         while True:  #loop to accept messges/errors
             #send message
-            os.system("clear")
+            #os.system("clear")
             print_board()
                 
             print ("Where would you like to move?")
@@ -192,21 +193,41 @@ def connect_main():
                 print ("Closing application")
                 break
             
-            data = mySocket.recv(1024).decode()
-            print (data)
+            try:
+                data = mySocket.recv(1024).decode()
+                #print (data)
+            except:
+                print ("Lost connection")
+                print ("Terminating")
+                break
                 
             if data == "OK":
                 
-                do_move(int(message[-1]), turn)
+                player_move = int(message[-1])
+                do_move(player_move, turn)
                 turn += 1
                 #print_board()
                 new_move = mySocket.recv(1024).decode()
                 if new_move == "LOSS":
+                    os.system("clear")
+                    do_move(player_move, turn)
+                    print_board()
                     print ("You won the game!")
                     print ("Terminating connection")
                     break
                 elif new_move == "WIN":
+                    os.system("clear")
+                    new_move = mySocket.recv(1024).decode()
+                    do_move(new_move, turn)
+                    print_board()
                     print ("You lost the game :(")
+                    print ("Terminating connection")
+                    break
+                elif data == "CAT GAME":
+                    os.system("clear")
+                    do_move(player_move, turn)
+                    print_board()
+                    print ("No one won the game")
                     print ("Terminating connection")
                     break
                 elif new_move == "GOODBYE":
@@ -217,7 +238,9 @@ def connect_main():
                 do_move(int(new_move), turn)
                 #print_board()
                 turn += 1
-            elif data == "ERROR 1":
+                
+            os.system("clear") 
+            if data == "ERROR 1":
                 print ("That column was full, choose a new one")
                 print ()
                 continue
@@ -230,11 +253,26 @@ def connect_main():
                 print ()
                 continue
             elif data == "LOSS":
+                os.system("clear")
+                do_move(player_move, turn)
+                print_board()
                 print ("You won the game!")
                 print ("Terminating connection")
                 break
             elif data == "WIN":
+                os.system("clear")
+                new_move = mySocket.recv(1024).decode()
+                do_move(new_move, turn)
+                print_board()
                 print ("You lost the game :(")
+                print ("Terminating connection")
+                break
+            elif data == "CAT GAME":
+                os.system("clear")
+                new_move = mySocket.recv(1024).decode()
+                do_move(new_move, turn)
+                print_board()
+                print ("No one won the game")
                 print ("Terminating connection")
                 break
             elif data == "GOODBYE":

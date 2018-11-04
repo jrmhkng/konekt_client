@@ -123,7 +123,7 @@ def main():
         board.append(new_layer)
    
     s = socket.socket()
-    host = "127.0.0.1"
+    host = "192.168.1.19"#127.0.0.1
     print("Host is: " + host)
     port = 12345         
     s.bind((host, port))
@@ -151,7 +151,7 @@ def main():
                     break
                 
                 print("They sent us: \"" + recv_buff + "\"")
-                   
+                
                 if recv_buff[:-2] == "PUT":
                     print ("Valid put command")
                     player_move = recv_buff[-1]
@@ -165,7 +165,7 @@ def main():
                         continue
                     
                     player_move = int(player_move)
-                    if player_move < 0 or player_move > 7:
+                    if player_move < 1 or player_move > 7:
                         print ("Out of bounds")
                         c.send("ERROR 2".encode())
                         continue
@@ -185,11 +185,13 @@ def main():
                         print ("Server lost, player won")
                         print ("Terminating connection")
                         c.send("LOSS".encode())
+                        #c.send(str(player_move).encode())
                         break
                     elif check_cat_game():
                         print ("It was a cat game")
                         print ("Terminating connection")
                         c.send("CAT GAME".encode())
+                        #c.send(str(player_move).encode())
                         break
                     
                     print ("They played in spot", recv_buff[:-1])
@@ -213,11 +215,13 @@ def main():
                         print ("Server won, player lost")
                         print ("Terminating connection")
                         c.send("WIN".encode())
+                        c.send(str(move).encode())
                         break
                     elif check_cat_game():
                         print ("It was a cat game")
                         print ("Terminating connection")
                         c.send("CAT GAME".encode())
+                        c.send(str(move).encode())
                         break
                     
                     c.send(str(move).encode())
@@ -238,6 +242,7 @@ def main():
                     
                 print ()
         else:
+            c.send("GO AHEAD".encode())
             print ("Imposter, you're not my client!")
             print ("Terminating shady connection")
                 
